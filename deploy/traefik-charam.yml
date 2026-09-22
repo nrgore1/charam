@@ -1,0 +1,26 @@
+# Copy to /opt/liqmint/edge/dynamic/charam.yml then restart Traefik.
+http:
+  routers:
+    charam:
+      rule: "Host(`charam.org`) || Host(`www.charam.org`)"
+      entryPoints:
+        - websecure
+      service: charam
+      tls:
+        certResolver: letsencrypt
+    charam-api:
+      rule: "(Host(`charam.org`) || Host(`www.charam.org`)) && (PathPrefix(`/api`) || PathPrefix(`/admin`))"
+      entryPoints:
+        - websecure
+      service: charam-api
+      tls:
+        certResolver: letsencrypt
+  services:
+    charam:
+      loadBalancer:
+        servers:
+          - url: "http://charam-web:80"
+    charam-api:
+      loadBalancer:
+        servers:
+          - url: "http://charam-api:8080"

@@ -1,5 +1,8 @@
+"use client";
+
 import { ExternalLink } from "lucide-react";
 import { CHARITIES } from "@/lib/site";
+import { outboundUrl, recordEvent } from "@/lib/track";
 
 export default function Charities() {
   return (
@@ -28,9 +31,12 @@ export default function Charities() {
                 {c.blurb}
               </p>
               <a
-                href={c.url}
+                href={outboundUrl(c.url)}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  recordEvent("outbound_click", { org: c.name, source: "charities-section" })
+                }
                 className="mt-5 inline-flex items-center gap-2 self-start font-semibold text-forest underline decoration-saffron decoration-2 underline-offset-4 hover:text-saffron-deep"
               >
                 Donate at {new URL(c.url).hostname.replace("www.", "")}

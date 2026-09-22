@@ -1,3 +1,5 @@
+# Build the static export, then serve it with nginx — same pattern as the
+# other sha-tagged web images on the VPS (e.g. liqmint/vireoka).
 FROM node:20-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json* ./

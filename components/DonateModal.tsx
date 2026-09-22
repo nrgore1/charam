@@ -2,12 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import { type Currency } from "@/lib/site";
+import { CHARITIES, type Currency } from "@/lib/site";
+import { outboundUrl, recordEvent } from "@/lib/track";
 
 const AMOUNTS: Record<Currency, number[]> = {
   USD: [60, 250, 400],
   INR: [5000, 21000, 33000],
 };
+
+type Step = "form" | "after" | "done";
 
 export default function DonateModal({
   open,
@@ -18,18 +21,23 @@ export default function DonateModal({
   initialDedication: string;
   onClose: () => void;
 }) {
+  const [step, setStep] = useState<Step>("form");
   const [frequency, setFrequency] = useState<"once" | "monthly">("once");
   const [currency, setCurrency] = useState<Currency>("USD");
   const [amount, setAmount] = useState<number>(250);
   const [custom, setCustom] = useState("");
   const [dedication, setDedication] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [pledgeId, setPledgeId] = useState("");
+  const [chosenOrg, setChosenOrg] = useState("");
+  const [org, setOrg] = useState(CHARITIES[0].name);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (open) {
       setDedication(initialDedication);
-      setSubmitted(false);
+      setStep("form");
+      setPledgeId("");
+      setChosenOrg("");
       dialogRef.current?.focus();
     }
   }, [open, initialDedication]);
@@ -44,11 +52,25 @@ export default function DonateModal({
 
   const finalAmount = custom ? Number(custom) || 0 : amount;
   const symbol = currency === "USD" ? "$" : "₹";
+  const selectedCharity = CHARITIES.find((c) => c.name === org);
 
-  const handleContinue = () => {
-    // Integration point: create a Stripe Checkout session or Razorpay order
-    // with { frequency, currency, amount: finalAmount, dedication }.
-    setSubmitted(true);
+  const choose = (orgName: string) => {
+    const id =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : String(Date.now());
+    setPledgeId(id);
+    setChosenOrg(orgName);
+    recordEvent("pledge", {
+      id,
+      org: orgName,
+      amount: finalAmount,
+      currency,
+      frequency,
+      dedication,
+      source: "modal",
+    });
+    setStep("after");
   };
 
   return (
@@ -63,7 +85,7 @@ export default function DonateModal({
         aria-labelledby="donate-title"
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg rounded-2xl bg-parchment p-7 shadow-2xl sm:p-9"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-parchment p-7 shadow-2xl sm:p-9"
       >
         <div className="flex items-start justify-between">
           <h2 id="donate-title" className="font-display text-3xl text-forest">
@@ -79,34 +101,8 @@ export default function DonateModal({
           </button>
         </div>
 
-        {submitted ? (
-          <div role="status" className="mt-8">
-            <p className="font-display text-2xl text-saffron-deep">
-              Thank you for your gratitude.
-            </p>
-            <p className="mt-3 leading-relaxed text-ink-soft">
-              This is where secure payment opens ({currency === "USD" ? "Stripe" : "Razorpay"}).
-              Your {frequency === "monthly" ? "monthly " : ""}gift of {symbol}
-              {finalAmount.toLocaleString()}
-              {dedication ? `, dedicated to ${dedication},` : ""} is ready to
-              change a girl&rsquo;s story.
-            </p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="mt-6 rounded-full bg-forest px-6 py-3 font-semibold text-parchment"
-            >
-              Close
-            </button>
-          </div>
-        ) : (
-          <form
-            className="mt-6 space-y-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleContinue();
-            }}
-          >
+        {step === "form" && (
+          <form className="mt-6 space-y-6" onSubmit={(e) => e.preventDefault()}>
             <div className="grid grid-cols-2 gap-2" role="group" aria-label="Frequency">
               {(
                 [
@@ -198,16 +194,102 @@ export default function DonateModal({
               />
             </label>
 
-            <button
-              type="submit"
-              disabled={finalAmount <= 0}
-              className="w-full rounded-full bg-saffron py-3.5 font-semibold text-forest-deep transition-colors hover:bg-saffron-deep hover:text-parchment disabled:opacity-50"
-            >
-              Continue to secure payment — {symbol}
-              {finalAmount.toLocaleString()}
-              {frequency === "monthly" ? "/month" : ""}
-            </button>
+            <label className="block text-sm">
+              <span className="font-semibold text-ink">Give through</span>
+              <select
+                value={org}
+                onChange={(e) => setOrg(e.target.value)}
+                className="mt-2 w-full rounded-lg border border-brass/40 bg-white px-4 py-3 text-ink"
+              >
+                {CHARITIES.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name} — {new URL(c.url).hostname.replace("www.", "")}
+                  </option>
+                ))}
+              </select>
+              <span className="mt-2 block text-xs leading-relaxed text-ink-soft">
+                You pay the organization directly on their secure site — Charam
+                never handles your money.
+              </span>
+            </label>
+
+            {finalAmount > 0 && selectedCharity ? (
+              <a
+                href={outboundUrl(selectedCharity.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => choose(org)}
+                className="block w-full rounded-full bg-saffron py-3.5 text-center font-semibold text-forest-deep transition-colors hover:bg-saffron-deep hover:text-parchment"
+              >
+                Give {symbol}
+                {finalAmount.toLocaleString()}
+                {frequency === "monthly" ? "/month" : ""} via {org}
+              </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="w-full rounded-full bg-saffron py-3.5 font-semibold text-forest-deep opacity-50"
+              >
+                Enter an amount to continue
+              </button>
+            )}
           </form>
+        )}
+
+        {step === "after" && (
+          <div className="mt-6" role="status">
+            <p className="leading-relaxed text-ink-soft">
+              We&rsquo;ve opened <strong className="text-forest">{chosenOrg}</strong> in
+              a new tab — complete your gift of {symbol}
+              {finalAmount.toLocaleString()} there
+              {dedication ? `, dedicated to ${dedication}` : ""}. When
+              you&rsquo;re done, let us know so we can count your gratitude:
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  recordEvent("confirmed", {
+                    ref: pledgeId,
+                    org: chosenOrg,
+                    amount: finalAmount,
+                    currency,
+                  });
+                  setStep("done");
+                }}
+                className="rounded-full bg-forest px-6 py-3 font-semibold text-parchment hover:bg-forest-deep"
+              >
+                I completed my donation
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-full border border-brass/40 px-6 py-3 font-semibold text-ink-soft hover:border-forest"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "done" && (
+          <div className="mt-6" role="status">
+            <p className="font-display text-2xl text-saffron-deep">
+              Thank you for your gratitude.
+            </p>
+            <p className="mt-3 leading-relaxed text-ink-soft">
+              Your gift through {chosenOrg} will carry a girl&rsquo;s education
+              forward. May the blessing return to you many times over.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-6 rounded-full bg-forest px-6 py-3 font-semibold text-parchment"
+            >
+              Close
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,23 @@
+# Lives at /opt/charam/compose.yml on the VPS.
+# /opt/charam/.env must contain TAG (written by deploy.sh) plus
+# ADMIN_USER and ADMIN_PASS for the /admin dashboard.
 services:
   web:
     image: charam/web:${TAG:-latest}
     container_name: charam-web
     restart: unless-stopped
+    networks:
+      - liqmint-edge
+
+  api:
+    image: charam/api:${TAG:-latest}
+    container_name: charam-api
+    restart: unless-stopped
+    environment:
+      - ADMIN_USER=${ADMIN_USER:?set in /opt/charam/.env}
+      - ADMIN_PASS=${ADMIN_PASS:?set in /opt/charam/.env}
+    volumes:
+      - /opt/charam/data:/data
     networks:
       - liqmint-edge
 

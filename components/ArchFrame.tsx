@@ -1,4 +1,9 @@
-﻿export default function ArchFrame({
+/**
+ * Arched hero artwork: a girl reading at dawn beside a lit diya.
+ * Original vector illustration in the brand palette; replace with
+ * consented photography later if desired by swapping the svg for next/image.
+ */
+export default function ArchFrame({
   caption,
   className = "",
 }: {

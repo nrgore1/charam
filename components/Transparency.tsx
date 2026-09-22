@@ -70,9 +70,10 @@ export default function Transparency({ onSponsor }: { onSponsor: () => void }) {
           <div>
             <h3 className="font-display text-2xl text-forest">The 100% promise</h3>
             <p className="mt-3 max-w-measure leading-relaxed text-ink">
-              Every donated rupee and dollar goes directly to partner schools as
-              tuition, kits, and lab access. Our small administrative costs are
-              covered separately by the founding family — never from your gift.
+              Your gift never passes through Charam. When you sponsor, we hand
+              you directly to the trusted organization you choose, and 100% of
+              your donation goes to them. Charam&rsquo;s own costs are covered
+              separately by the founding family — never from your gift.
             </p>
             <p className="mt-4 max-w-measure text-sm leading-relaxed text-ink-soft">
               {LEGAL.disclosure} Annual progress reports are published each
