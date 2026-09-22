@@ -1,0 +1,11 @@
+services:
+  web:
+    image: charam/web:${TAG:-latest}
+    container_name: charam-web
+    restart: unless-stopped
+    networks:
+      - liqmint-edge
+
+networks:
+  liqmint-edge:
+    external: true

@@ -1,0 +1,2 @@
+* text=auto
+deploy/deploy.sh text eol=lf
