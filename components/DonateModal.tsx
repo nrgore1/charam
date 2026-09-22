@@ -53,6 +53,9 @@ export default function DonateModal({
   const finalAmount = custom ? Number(custom) || 0 : amount;
   const symbol = currency === "USD" ? "$" : "₹";
   const selectedCharity = CHARITIES.find((c) => c.name === org);
+  const donateTarget = selectedCharity
+    ? selectedCharity.urlByCurrency?.[currency] ?? selectedCharity.url
+    : "";
 
   const choose = (orgName: string) => {
     const id =
@@ -216,7 +219,7 @@ export default function DonateModal({
 
             {finalAmount > 0 && selectedCharity ? (
               <a
-                href={outboundUrl(selectedCharity.url)}
+                href={outboundUrl(donateTarget)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => choose(org)}

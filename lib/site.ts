@@ -40,6 +40,7 @@ export interface Charity {
   name: string;
   blurb: string;
   url: string;
+  urlByCurrency?: Partial<Record<Currency, string>>;
 }
 
 export const CHARITIES: Charity[] = [
@@ -60,12 +61,14 @@ export const CHARITIES: Charity[] = [
     blurb:
       "Girls' education and literacy programmes helping girls complete secondary school with strong life skills.",
     url: "https://secure.roomtoread.org/page/145055/donate/1",
+    urlByCurrency: { INR: "https://give.do/ngos/room-to-read-india-trust" },
   },
   {
     name: "Pratham",
     blurb:
       "One of India's largest education NGOs, focused on measurable learning outcomes for underserved children.",
     url: "https://pratham.org/?p=25078",
+    urlByCurrency: { USD: "https://prathamusa.org/?p=8580" },
   },
 ];
 
