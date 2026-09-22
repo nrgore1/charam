@@ -47,25 +47,25 @@ export const CHARITIES: Charity[] = [
     name: "Project Nanhi Kali",
     blurb:
       "K.C. Mahindra Education Trust programme sponsoring underprivileged girls through ten years of schooling, with progress reports for every sponsor.",
-    url: "https://donor.nanhikali.org",
+    url: "https://donor.nanhikali.org/dnrsponsornk",
   },
   {
     name: "Educate Girls",
     blurb:
       "Mobilizes community volunteers across rural India to find, enroll, and retain out-of-school girls.",
-    url: "https://www.educategirls.ngo",
+    url: "https://educategirls.ngo/?p=33",
   },
   {
     name: "Room to Read",
     blurb:
       "Girls' education and literacy programmes helping girls complete secondary school with strong life skills.",
-    url: "https://www.roomtoread.org",
+    url: "https://secure.roomtoread.org/page/145055/donate/1",
   },
   {
     name: "Pratham",
     blurb:
       "One of India's largest education NGOs, focused on measurable learning outcomes for underserved children.",
-    url: "https://www.pratham.org",
+    url: "https://pratham.org/?p=25078",
   },
 ];
 

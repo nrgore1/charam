@@ -10,6 +10,7 @@ import CelebrationGiving from "@/components/CelebrationGiving";
 import Transparency from "@/components/Transparency";
 import Footer from "@/components/Footer";
 import DonateModal from "@/components/DonateModal";
+import ConfirmBanner from "@/components/ConfirmBanner";
 
 export default function Home() {
   const [donateOpen, setDonateOpen] = useState(false);
@@ -37,6 +38,7 @@ export default function Home() {
         initialDedication={dedication}
         onClose={() => setDonateOpen(false)}
       />
+      <ConfirmBanner suppressed={donateOpen} />
     </>
   );
 }

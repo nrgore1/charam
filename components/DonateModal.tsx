@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { CHARITIES, type Currency } from "@/lib/site";
-import { outboundUrl, recordEvent } from "@/lib/track";
+import { clearPending, outboundUrl, recordEvent, savePending } from "@/lib/track";
 
 const AMOUNTS: Record<Currency, number[]> = {
   USD: [60, 250, 400],
@@ -70,6 +70,7 @@ export default function DonateModal({
       dedication,
       source: "modal",
     });
+    savePending({ id, org: orgName, amount: finalAmount, currency, ts: Date.now() });
     setStep("after");
   };
 
@@ -256,6 +257,7 @@ export default function DonateModal({
                     amount: finalAmount,
                     currency,
                   });
+                  clearPending();
                   setStep("done");
                 }}
                 className="rounded-full bg-forest px-6 py-3 font-semibold text-parchment hover:bg-forest-deep"

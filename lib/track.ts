@@ -17,3 +17,42 @@ export function recordEvent(type: string, data: Record<string, unknown>): void {
     /* no-op */
   }
 }
+
+export interface PendingPledge {
+  id: string;
+  org: string;
+  amount: number;
+  currency: string;
+  ts: number;
+}
+
+const PENDING_KEY = "charam-pending-pledge";
+const PENDING_TTL = 48 * 3600 * 1000; // 48h
+
+export function savePending(p: PendingPledge): void {
+  try {
+    localStorage.setItem(PENDING_KEY, JSON.stringify(p));
+  } catch {
+    /* no-op */
+  }
+}
+
+export function loadPending(): PendingPledge | null {
+  try {
+    const raw = localStorage.getItem(PENDING_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as PendingPledge;
+    if (!p || typeof p.ts !== "number" || Date.now() - p.ts > PENDING_TTL) return null;
+    return p;
+  } catch {
+    return null;
+  }
+}
+
+export function clearPending(): void {
+  try {
+    localStorage.removeItem(PENDING_KEY);
+  } catch {
+    /* no-op */
+  }
+}
